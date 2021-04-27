@@ -158,8 +158,18 @@ public class MainActivity extends AppCompatActivity {
         if (requestCode == 100) {
             if (resultCode == Activity.RESULT_OK && result != null) {
                 VCard vCard = VCardParser.parse(result.getStringExtra("DATA"));
-                Toast.makeText(this, vCard.getName() + " " + vCard.getTitle()  , Toast.LENGTH_SHORT).show();
-                login(vCard.getTitle(), vCard.getName());
+                try {
+                    if (vCard.getTitle() != null && vCard.getName() != null){
+                        Toast.makeText(this, vCard.getName() + " " + vCard.getTitle()  , Toast.LENGTH_SHORT).show();
+                        login(vCard.getTitle(), vCard.getName());
+                    } else {
+
+                        Toast.makeText(this, "Gagal, silahkan coba kembali"  , Toast.LENGTH_SHORT).show();
+                    }
+                } catch (Exception e){
+                    Toast.makeText(this, e.toString()  , Toast.LENGTH_SHORT).show();
+                }
+
             } else if (resultCode == Activity.RESULT_CANCELED) {
                 Log.v("Eror","err");
             }
@@ -187,7 +197,7 @@ public class MainActivity extends AppCompatActivity {
                     // Check for error node in json
                     if (success == 1) {
                         counter++;
-                        updateView(counter + ". NIK : " + jObj.getString("nik") +" TANGGAL: " + jObj.getString("tgl")+ " JAM: " + jObj.getString("jam"));
+                        updateView(counter + ". NAMA : " + jObj.getString("nama") + " NIK : " + jObj.getString("nik") +" TANGGAL: " + jObj.getString("tgl")+ " JAM: " + jObj.getString("jam"));
                         Toast.makeText(getApplicationContext(), "SELAMAT, CheckIn Berhasil!", Toast.LENGTH_LONG).show();
                     } else {
                         Toast.makeText(getApplicationContext(), "Maaf, terjadi kesalahan, silahkan dicoba lagi", Toast.LENGTH_LONG).show();
