@@ -11,12 +11,19 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.Uri;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
+import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Adapter;
 import android.widget.Toast;
@@ -45,6 +52,7 @@ import it.auron.library.vcard.VCard;
 import it.auron.library.vcard.VCardParser;
 
 public class MainActivity extends AppCompatActivity {
+
     private static final int PERMISSIONS = 100;
     private static final int ZXING_CAMERA_PERMISSION = 1;
     private static final int INTERNET_PERMISSION = 2;
@@ -91,9 +99,27 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        TelephonyManager telephonyManager = (TelephonyManager)getSystemService(Context.TELEPHONY_SERVICE);
-        String imei = telephonyManager.getDeviceId();
-        if (!imei.contains("869266020005648") ) {
+        String myuniqueID;
+        int myversion = Integer.valueOf(android.os.Build.VERSION.SDK);
+        if (myversion < 23) {
+            WifiManager manager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+            WifiInfo info = manager.getConnectionInfo();
+            myuniqueID= info.getMacAddress();
+            if (myuniqueID== null) {
+                TelephonyManager mngr = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+                myuniqueID= mngr.getDeviceId();
+            }
+        }
+        else if (myversion > 23 && myversion < 27) {
+            TelephonyManager mngr = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+            myuniqueID= mngr.getDeviceId();
+        }
+        else
+        {
+            String androidId = Settings.Secure.getString(this.getContentResolver(), Settings.Secure.ANDROID_ID);
+            myuniqueID= androidId;
+        }
+        if (!myuniqueID.contains("30435f97ae43f23e") ) {
             Toast.makeText(this, "APLIKASI HANYA BISA DIPAKAI DI DEVICE YANG TERDAFTAR DI DEPT. IT", Toast.LENGTH_SHORT).show();
             finish();
         };
@@ -106,10 +132,41 @@ public class MainActivity extends AppCompatActivity {
         launchActivity(ScannerActivity.class);
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle item selection
+        switch (item.getItemId()) {
+            case R.id.opsiKamera:
+                if(item.isChecked())
+                {
+                    item.setChecked(false);
+                }else{
+                    item.setChecked(true);
+                }
+                SharedPreferences mypref = PreferenceManager.getDefaultSharedPreferences(this);
+                SharedPreferences.Editor prefsEditr = mypref.edit();
+                prefsEditr.putInt("camera",item.isChecked() ? 1: 0 );
+                prefsEditr.commit();
+                return true;
+            case R.id.refresh:
+                mDataset.clear();
+                mAdapter.notifyDataSetChanged();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
     public void launchActivity(Class<?> clss) {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
-                != PackageManager.PERMISSION_GRANTED || ContextCompat.checkSelfPermission(this, Manifest.permission.INTERNET)
-                != PackageManager.PERMISSION_GRANTED || ContextCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE)
+                != PackageManager.PERMISSION_GRANTED && ContextCompat.checkSelfPermission(this, Manifest.permission.INTERNET)
+                != PackageManager.PERMISSION_GRANTED && ContextCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE)
                 != PackageManager.PERMISSION_GRANTED) {
             mClss = clss;
             String[] permisions = null;
@@ -238,5 +295,8 @@ public class MainActivity extends AppCompatActivity {
         mAdapter.notifyDataSetChanged();
     }
 
-
+    @Override
+    public void onBackPressed() {
+//        super.onBackPressed();
+    }
 }

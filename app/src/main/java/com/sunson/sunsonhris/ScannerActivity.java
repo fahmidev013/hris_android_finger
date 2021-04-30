@@ -1,8 +1,10 @@
 package com.sunson.sunsonhris;
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.ViewGroup;
 import android.widget.Toast;
@@ -16,6 +18,7 @@ public class ScannerActivity extends Activity implements ZXingScannerView.Result
     private static final String TAG = "Result";
     private ZXingScannerView mScannerView;
     private String data = "";
+    private int isFrontCamera = 0;
 
     @Override
     public void onCreate(Bundle state) {
@@ -26,13 +29,15 @@ public class ScannerActivity extends Activity implements ZXingScannerView.Result
         ViewGroup contentFrame = (ViewGroup) findViewById(R.id.content_frame);
         mScannerView = new ZXingScannerView(this);
         contentFrame.addView(mScannerView);
+        SharedPreferences mypref = PreferenceManager.getDefaultSharedPreferences(this);
+        isFrontCamera = mypref.getInt("camera", 0);
     }
 
     @Override
     public void onResume() {
         super.onResume();
         mScannerView.setResultHandler(this);
-        mScannerView.startCamera();
+        mScannerView.startCamera(isFrontCamera);
     }
 
     @Override

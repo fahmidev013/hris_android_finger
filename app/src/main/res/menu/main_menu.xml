@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/refresh"
+        android:title="Kamerra"
+        android:icon="@drawable/ic_baseline_delete_24"
+        android:checkable="true"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/opsiKamera"
+        android:title="Kamera Depan"
+        android:checkable="true"
+        app:showAsAction="never"
+        app:actionViewClass="android.widget.CheckBox" />
+</menu>
